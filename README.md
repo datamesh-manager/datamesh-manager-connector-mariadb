@@ -1,55 +1,44 @@
-# DataMesh Manager Connector for MariaDB
+Data Mesh Manager Connector for MariaDB
+===
 
-This connector integrates MariaDB database assets with the DataMesh Manager platform. It extracts database schemas, tables, and views from your MariaDB database and synchronizes them with your DataMesh Manager instance.
+The connector for MariaDB is a Spring Boot application that uses the [datamesh-manager-sdk](https://github.com/datamesh-manager/datamesh-manager-sdk) internally, and is available as a ready-to-use Docker image [datameshmanager/datamesh-manager-connector-mariadb](https://hub.docker.com/repository/docker/datameshmanager/datamesh-manager-connector-mariadb) to be deployed in your environment.
 
 ## Features
 
-- Extract schemas from MariaDB databases
-- Extract tables with column metadata
-- Extract views with column metadata
+- **Asset Synchronization**: Extract database schemas, tables, and views from your MariaDB database and synchronize them with your DataMesh Manager instance.
 - Filter out system schemas like `information_schema`
 - Schedule periodic synchronization with configurable intervals
 - State tracking to only synchronize changed assets
 
-## Configuration
+## Usage
 
-The connector can be configured using environment variables or in the `application.yml` file:
+Start the connector using Docker. You must pass the API keys as environment variables.
 
-```yaml
-datameshmanager:
-  client:
-    host: https://api.datamesh-manager.com
-    apikey: your-api-key
-    
-    # MariaDB Connector settings
-    mariadb:
-      connection:
-        host: localhost
-        port: 3306
-        database: yourdb
-        username: yourusername
-        password: yourpassword
-        
-      assets:
-        enabled: true
-        connectorid: mariadb-assets
-        pollinterval: PT10M  # ISO-8601 duration format - 10 minutes
+```
+docker run \
+  -e DATAMESHMANAGER_CLIENT_APIKEY='insert-api-key-here' \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_HOST='your-mariadb-server' \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_PORT='3306' \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_DATABASE='your-database' \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_USERNAME='your-username' \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_PASSWORD='your-password' \
+  datameshmanager/datamesh-manager-connector-mariadb:latest
 ```
 
-### Environment Variables
+## Configuration
 
-| Environment Variable | Description | Default |
-|----------------------|-------------|---------|
-| `DATAMESHMANAGER_HOST` | DataMesh Manager API host | https://api.datamesh-manager.com |
-| `DATAMESHMANAGER_APIKEY` | Your DataMesh Manager API key | - |
-| `MARIADB_HOST` | MariaDB server hostname | localhost |
-| `MARIADB_PORT` | MariaDB server port | 3306 |
-| `MARIADB_DATABASE` | Database name to connect to | - |
-| `MARIADB_USERNAME` | Username for MariaDB connection | - |
-| `MARIADB_PASSWORD` | Password for MariaDB connection | - |
-| `MARIADB_ASSETS_ENABLED` | Enable assets synchronization | true |
-| `MARIADB_ASSETS_CONNECTORID` | Unique ID for this connector instance | mariadb-assets |
-| `MARIADB_ASSETS_POLLINTERVAL` | Synchronization interval in ISO-8601 duration format | PT10M (10 minutes) |
+| Environment Variable                                    | Default Value                      | Description                                                                       |
+|--------------------------------------------------------|------------------------------------|-----------------------------------------------------------------------------------|
+| `DATAMESHMANAGER_CLIENT_HOST`                           | `https://api.datamesh-manager.com` | Base URL of the Data Mesh Manager API.                                            |
+| `DATAMESHMANAGER_CLIENT_APIKEY`                         |                                    | API key for authenticating requests to the Data Mesh Manager.                     |
+| `DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_HOST`        | `localhost`                        | MariaDB server hostname                                                           |
+| `DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_PORT`        | `3306`                             | MariaDB server port                                                               |
+| `DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_DATABASE`    |                                    | Database name to connect to                                                       |
+| `DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_USERNAME`    |                                    | Username for MariaDB connection                                                   |
+| `DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_PASSWORD`    |                                    | Password for MariaDB connection                                                   |
+| `DATAMESHMANAGER_CLIENT_MARIADB_ASSETS_ENABLED`         | `true`                             | Enable assets synchronization                                                     |
+| `DATAMESHMANAGER_CLIENT_MARIADB_ASSETS_CONNECTORID`     | `mariadb-assets`                   | Unique ID for this connector instance                                             |
+| `DATAMESHMANAGER_CLIENT_MARIADB_ASSETS_POLLINTERVAL`    | `PT10M`                            | Synchronization interval in ISO-8601 duration format (PT10M means 10 minutes)     |
 
 ## Building
 
@@ -68,20 +57,20 @@ datameshmanager:
 ### Using Docker
 
 ```bash
-docker build -t datamesh-manager/connector-mariadb .
+docker build -t datameshmanager/datamesh-manager-connector-mariadb .
 
 docker run -d \
-  -e DATAMESHMANAGER_HOST=https://api.datamesh-manager.com \
-  -e DATAMESHMANAGER_APIKEY=your-api-key \
-  -e MARIADB_HOST=your-mariadb-server \
-  -e MARIADB_PORT=3306 \
-  -e MARIADB_DATABASE=your-database \
-  -e MARIADB_USERNAME=your-username \
-  -e MARIADB_PASSWORD=your-password \
-  -e MARIADB_ASSETS_CONNECTORID=mariadb-assets \
+  -e DATAMESHMANAGER_CLIENT_HOST=https://api.datamesh-manager.com \
+  -e DATAMESHMANAGER_CLIENT_APIKEY=your-api-key \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_HOST=your-mariadb-server \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_PORT=3306 \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_DATABASE=your-database \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_USERNAME=your-username \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_CONNECTION_PASSWORD=your-password \
+  -e DATAMESHMANAGER_CLIENT_MARIADB_ASSETS_CONNECTORID=mariadb-assets \
   -p 8080:8080 \
   --name datamesh-manager-connector-mariadb \
-  datamesh-manager/connector-mariadb
+  datameshmanager/datamesh-manager-connector-mariadb
 ```
 
 ## Development
